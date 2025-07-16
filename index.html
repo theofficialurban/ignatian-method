@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Analysis: The Ignatian Method</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chosen Palette: Slate & Amber (Dark) -->
+    <!-- 
+      Application Structure Plan: The application is designed as an interactive dashboard with three distinct but interconnected views: "Military Parallels," "Psychological Conditioning," and "Operational Tactics." This structure was chosen to create a comprehensive narrative. Users can first understand the abstract model (Military), then see how the individual is forged (Psychological), and finally explore how that individual is deployed in the world (Operational). This non-linear, thematic approach allows users to compare the internal programming (Spiritual Exercises) with the external strategy (Secret Instructions), making the report's complex arguments more digestible and impactful.
+    -->
+    <!-- 
+      Visualization & Content Choices: 
+      - Report Info: Parallels to Military Discipline -> Goal: Compare thematic concepts -> Viz: Interactive Cards -> Interaction: Click to reveal detailed text -> Justification: Allows users to focus on one abstract concept at a time.
+      - Report Info: Phased Psychological Conditioning (Four Weeks) -> Goal: Show change over time/process -> Viz: Timeline + Line Chart (Chart.js) -> Interaction: Clicking a phase on the timeline updates both text and the chart -> Justification: Visually represents the abstract psychological dynamics (distress vs. adherence) over the four phases.
+      - Report Info: The Secret Instructions of the Jesuits -> Goal: Expose strategic methods -> Viz: Interactive Cards -> Interaction: Click to reveal specific manipulative tactics -> Justification: Thematically groups the various deceptive strategies (Infiltration, Wealth Acquisition, etc.) for clear, focused exploration of the operational manual.
+      - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 350px;
+        max-height: 50vh;
+      }
+      @media (min-width: 768px) {
+        .chart-container {
+          height: 450px;
+        }
+      }
+      .nav-button.active {
+        background-color: #f59e0b;
+        color: white;
+      }
+      .stepper-item.active .stepper-circle {
+        background-color: #f59e0b;
+        border-color: #f59e0b;
+        color: white;
+      }
+      .stepper-item.active .stepper-label {
+        color: #f59e0b;
+        font-weight: 700;
+      }
+      .card.active {
+        border-color: #f59e0b;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        transform: translateY(-4px);
+      }
+      #content-display ul,
+      #psychological-content-display ul {
+        list-style-position: inside;
+        padding-left: 1rem;
+      }
+      #content-display li,
+      #psychological-content-display li {
+        margin-bottom: 0.5rem;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-900 text-slate-200">
+    <div class="container mx-auto p-4 md:p-8">
+      <img class="mx-auto w-[300px] pb-8" src="./assets/cover.png" />
+      <header class="text-center mb-8 md:mb-12">
+        <h1 class="text-3xl md:text-5xl font-bold text-white">
+          The Ignatian Method
+        </h1>
+        <p
+          class="mt-2 md:mt-4 text-lg md:text-xl text-slate-300 max-w-3xl mx-auto"
+        >
+          An Interactive Analysis of Psychological and Strategic Dominion
+        </p>
+        <p class="mt-2 text-sm text-slate-400 max-w-3xl mx-auto">
+          This application explores the dual nature of the Jesuit method as
+          presented in the source documents: the internal programming of the
+          'Spiritual Exercises' and the external strategy of the 'Secret
+          Instructions'.
+        </p>
+      </header>
+
+      <nav
+        class="flex justify-center mb-8 md:mb-12 space-x-2 md:space-x-4 bg-slate-800 p-2 rounded-xl max-w-xl mx-auto"
+      >
+        <button
+          id="nav-military"
+          class="nav-button w-full text-center px-4 py-2 rounded-lg font-semibold text-slate-300 hover:bg-slate-700 transition-colors duration-300"
+        >
+          Military Parallels
+        </button>
+        <button
+          id="nav-psychological"
+          class="nav-button w-full text-center px-4 py-2 rounded-lg font-semibold text-slate-300 hover:bg-slate-700 transition-colors duration-300"
+        >
+          Psychological Conditioning
+        </button>
+        <button
+          id="nav-operational"
+          class="nav-button w-full text-center px-4 py-2 rounded-lg font-semibold text-slate-300 hover:bg-slate-700 transition-colors duration-300"
+        >
+          Operational Tactics
+        </button>
+      </nav>
+
+      <main id="content-area">
+        <!-- Content will be injected here by JavaScript -->
+      </main>
+    </div>
+
+    <script>
+      const contentData = {
+        military: {
+          title: "Parallels with Military Discipline",
+          intro:
+            "The Exercises function not as a gentle guide, but as a rigorous training regimen for a 'spiritual combatant.' The methodology shares profound structural parallels with military conditioning, designed to instill obedience and resilience by bypassing critical thought and installing conditioned responses.",
+          cards: [
+            {
+              id: "commander",
+              icon: "🛡️",
+              title: "The Commander",
+              content:
+                "The role of the 'Director' is described as 'essential' and 'indispensable.' This figure is not a passive counselor but an active commander who modifies exercises, manages the exercitant's emotional state, and acts as the sole arbiter of reality. This fosters profound dependency, undermining the individual's trust in their own judgment and mirroring the absolute authority of a drill instructor who controls every aspect of a recruit's environment to forge a new, disciplined identity.",
+            },
+            {
+              id: "mission",
+              icon: "🎯",
+              title: "The Singular Mission",
+              content:
+                "The 'Principle or Foundation' establishes a non-negotiable mission: to serve God and be saved. All other concerns—health, wealth, life itself—are regarded with 'indifference.' This mirrors a soldier's 'unlimited liability,' where personal desires are subordinated to the mission. It creates a closed loop of logic where any action can be justified if it serves the ultimate end, purging the individual of any internal source of dissent.",
+            },
+            {
+              id: "battlefield",
+              icon: "⚔️",
+              title: "The Battlefield",
+              content:
+                "The Exercises frame life as a literal, perpetual war. The 'Contemplation of the Kingdom of Christ' presents a stark choice between 'Two Standards'—Christ, the General, and Lucifer, the enemy. This 'warfare worldview' primes the individual for conflict and sacrifice, creating a black-and-white 'us vs. them' reality. This binary opposition fosters a siege mentality and demands total loyalty to the 'Company of Christ.'",
+            },
+            {
+              id: "enemy",
+              icon: "👻",
+              title: "The Enemy Within",
+              content:
+                "The 'Rules for Discerning Spirits' act as an internal counter-intelligence framework. The individual is trained to meticulously analyze their own thoughts to detect the 'serpentine tail' of the 'malignant spirit.' This creates a state of hyper-vigilance and self-surveillance, where every spontaneous thought is held in suspicion until ideologically verified. The individual becomes their own thought-police, a far more effective form of control than any external supervision.",
+            },
+          ],
+        },
+        psychological: {
+          title: "Phased Psychological Conditioning",
+          intro:
+            "The structure of the 'Four Weeks' follows a classic pattern of psychological conditioning: destabilization, re-education, and refreezing. This process systematically breaks down an individual's identity and replaces it with a new one, using controlled psychological distress as a catalyst for transformation.",
+          chartData: {
+            labels: [
+              "Phase 1: Demolition",
+              "Phase 2: Reconstruction",
+              "Phase 3: Hardening",
+              "Phase 4: Integration",
+            ],
+            datasets: [
+              {
+                label: "Psychological Distress",
+                data: [8, 4, 3, 2],
+                borderColor: "#f87171",
+                backgroundColor: "#fecaca20",
+                fill: true,
+                tension: 0.3,
+              },
+              {
+                label: "Adherence to New Identity",
+                data: [1, 5, 8, 9],
+                borderColor: "#60a5fa",
+                backgroundColor: "#bfdbfe20",
+                fill: true,
+                tension: 0.3,
+              },
+            ],
+          },
+          phases: [
+            {
+              title: "Phase 1: Demolition",
+              content:
+                "The first week is a 'calculated breakdown.' The individual is immersed in meditations on sin, punishment, and hell, designed to cultivate 'abhorrence, shame, and confusion.' By systematically demoralizing the person and stripping away self-worth, this phase induces a controlled trauma. It manufactures a psychological crisis so acute that the individual becomes desperate for a solution, making them exceptionally receptive to the new identity about to be offered.",
+            },
+            {
+              title: "Phase 2: Reconstruction",
+              content:
+                "After the breakdown, a new model is presented: the life of Christ. The individual, having been led to believe their old self is corrupt, eagerly embraces this new persona as the only means of salvation from the torment induced in the first phase. The choice of allegiance under the 'Two Standards' functions as a point of commitment, like an oath of enlistment, creating a powerful, trauma-induced bond to the new identity and the authority figure who provided it.",
+            },
+            {
+              title: "Phase 3: Hardening",
+              content:
+                "The focus shifts to Christ's Passion, reframing suffering as a desirable state and a mark of honor. This phase builds psychological resilience by inoculating the individual against future hardship. It is a form of stress inoculation, similar to military training that exposes soldiers to simulated combat. It recalibrates the person's relationship to pain, transforming it from something to be avoided into a proof of loyalty, solidifying their commitment.",
+            },
+            {
+              title: "Phase 4: Integration",
+              content:
+                "The final stage solidifies the transformation. The focus on glory raises the soul 'from fear to love,' making the new identity the core of the person's being. The system achieves a self-sustaining loop, producing a 'completely changed' individual. The external control of the Director becomes redundant because the control system has been fully internalized. They are not merely compliant; they are a willing, self-policing agent of the system.",
+            },
+          ],
+        },
+        operational: {
+          title: "Operational Tactics: The Secret Instructions",
+          intro:
+            "If the Spiritual Exercises create the perfect operative, the 'Secret Instructions' are their field manual. These clandestine strategies, known only to the highest echelons, outline a ruthless methodology for gaining influence, accumulating wealth, and neutralizing opposition, all under a facade of piety.",
+          cards: [
+            {
+              id: "infiltration",
+              icon: "👑",
+              title: "Infiltrating the Elite",
+              content: `The primary objective is to gain the 'ear and hearts' of princes and nobles, making them 'our creatures.' This is achieved through several means:
+                                  <ul class="list-disc mt-4 space-y-2">
+                                    <li><b>Moral Elasticity:</b> Confessors are instructed to 'wink at their vices' and put a 'favorable construction on whatever they do amiss,' even encouraging forbidden marriages by promising easy papal dispensations.</li>
+                                    <li><b>Political Manipulation:</b> They are to 'edge on and excite' a prince in an unpopular enterprise while dissuading opponents, ensuring deniability if the venture fails.</li>
+                                    <li><b>Intelligence Gathering:</b> They cultivate domestics and 'minions' of princes with 'small presents' to gain 'faithful intelligence of the bent of their master's humors and inclinations.'</li>
+                                    <li><b>Covert Appointments:</b> Through 'third persons' and 'favorites,' they subtly recommend loyal Society friends for positions of honor and public office.</li>
+                                  </ul>`,
+            },
+            {
+              id: "wealth",
+              icon: "💰",
+              title: "Wealth Acquisition",
+              content: `A key focus is inducing rich widows to be 'liberal to our Society.' This is a multi-pronged strategy of psychological manipulation:
+                                  <ul class="list-disc mt-4 space-y-2">
+                                    <li><b>Isolating the Target:</b> Elderly, agreeable members visit rich widows, praise celibacy, and actively discourage remarriage by smearing any potential suitors.</li>
+                                    <li><b>Household Infiltration:</b> Servants not loyal to the Society are gradually removed and replaced with 'our creatures' to 'dive into every secret, and have a finger in every affair.'</li>
+                                    <li><b>Exploiting Vulnerability:</b> When a benefactor is sick or in danger of life, the 'poverty of our colleges' is exaggerated to induce 'liberality' for 'eternal happiness.'</li>
+                                    <li><b>Covert Finance:</b> The Society would borrow money on bond from rich friends, then manipulate them during illness to 'deliver up the bond,' gaining handsomely without incurring ill-will from heirs.</li>
+                                  </ul>`,
+            },
+            {
+              id: "suppression",
+              icon: "🤫",
+              title: "Suppressing Rivals",
+              content: `Other religious orders and any opposition must be systematically undermined and neutralized to ensure the Society's dominance:
+                                  <ul class="list-disc mt-4 space-y-2">
+                                    <li><b>Character Assassination:</b> The 'defects' of other religious orders must be 'diligently canvassed and remarked,' then gradually published to faithful friends with 'a seeming sorrow.'</li>
+                                    <li><b>Discrediting Education:</b> Any order trying to establish rival schools is to be accused of fomenting 'tumults and sedition,' with the public assertion that 'no society but ours is qualified' for such an important office.</li>
+                                    <li><b>Monopolizing Influence:</b> Devotees are prevented from visiting other churches by being told that 'all the indulgences of other orders are with greater extent contained in ours.'</li>
+                                    <li><b>Removing Competition:</b> Competing religious figures are to be removed from positions of influence, especially when dealing with the sick and dying, to ensure Jesuit confessors are the sole spiritual guides.</li>
+                                  </ul>`,
+            },
+            {
+              id: "control",
+              icon: "⛓️",
+              title: "Internal Control & Dismissal",
+              content: `Absolute internal loyalty is enforced through a process of psychological abuse and control, ensuring no dissent can take root:
+                                  <ul class="list-disc mt-4 space-y-2">
+                                    <li><b>Systematic Harassment:</b> Members deemed disloyal are 'mortified and vexed with exercises of the most servile offices,' publicly reprimanded, and denied recreation until they show 'murmuration and impatience,' which justifies their dismissal.</li>
+                                    <li><b>Enforced Silence:</b> Before dismissal, members are forced to swear in writing that they will not speak or write negatively about the Society.</li>
+                                    <li><b>Discrediting Dissenters:</b> Superiors keep detailed records of members' 'evil inclinations, failings, and vices' (often gathered through confession) to be used to impede their future or discredit them if they ever speak out.</li>
+                                    <li><b>Public Smear Campaigns:</b> The Society widely disseminates general reasons for expulsion, such as 'immortification of mind' or 'disobedience,' and depicts former members as 'turbulent' and unstable.</li>
+                                  </ul>`,
+            },
+          ],
+        },
+      };
+
+      const contentArea = document.getElementById("content-area");
+      const navMilitary = document.getElementById("nav-military");
+      const navPsychological = document.getElementById("nav-psychological");
+      const navOperational = document.getElementById("nav-operational");
+      let chartInstance = null;
+      let activeView = "";
+      let activeCardId = null;
+      let activePhaseIndex = 0;
+
+      function renderGenericCardView(viewName) {
+        const data = contentData[viewName];
+        let cardsHtml = data.cards
+          .map(
+            (card) => `
+                <div id="card-${card.id}" class="card border-2 border-slate-700 bg-slate-800 p-4 rounded-lg cursor-pointer transition-all duration-300 hover:border-amber-500 hover:shadow-md">
+                    <h3 class="text-xl font-bold flex items-center text-slate-100">
+                        <span class="text-2xl mr-3">${card.icon}</span>
+                        ${card.title}
+                    </h3>
+                </div>
+            `
+          )
+          .join("");
+
+        contentArea.innerHTML = `
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-white">${data.title}</h2>
+                    <p class="mt-2 text-slate-300 max-w-2xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    ${cardsHtml}
+                </div>
+                <div id="content-display" class="bg-slate-800 p-6 rounded-lg min-h-[150px] text-slate-300 transition-opacity duration-500 opacity-0">
+                    <p>Select a concept above to learn more.</p>
+                </div>
+            `;
+
+        data.cards.forEach((card) => {
+          document
+            .getElementById(`card-${card.id}`)
+            .addEventListener("click", () => {
+              if (activeCardId) {
+                const oldCard = document.getElementById(`card-${activeCardId}`);
+                if (oldCard) oldCard.classList.remove("active");
+              }
+              document
+                .getElementById(`card-${card.id}`)
+                .classList.add("active");
+              activeCardId = card.id;
+
+              const display = document.getElementById("content-display");
+              display.classList.remove("opacity-100");
+              display.classList.add("opacity-0");
+
+              setTimeout(() => {
+                display.innerHTML = `<div class="text-lg">${card.content}</div>`;
+                display.classList.remove("opacity-0");
+                display.classList.add("opacity-100");
+              }, 300);
+            });
+        });
+      }
+
+      function renderPsychologicalView() {
+        const data = contentData.psychological;
+        let stepperHtml = data.phases
+          .map(
+            (phase, index) => `
+                <div class="stepper-item flex-1 flex items-center cursor-pointer" data-index="${index}">
+                    <div class="flex flex-col items-center w-full">
+                        <div class="stepper-circle w-10 h-10 rounded-full border-2 border-slate-600 bg-slate-800 flex items-center justify-center font-bold text-slate-400 transition-all duration-300">${
+                          index + 1
+                        }</div>
+                        <p class="stepper-label text-center text-sm mt-2 text-slate-400 transition-all duration-300">${
+                          phase.title
+                        }</p>
+                    </div>
+                    ${
+                      index < data.phases.length - 1
+                        ? '<div class="flex-auto border-t-2 border-slate-700 transition-all duration-300"></div>'
+                        : ""
+                    }
+                </div>
+            `
+          )
+          .join("");
+
+        contentArea.innerHTML = `
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-white">${data.title}</h2>
+                    <p class="mt-2 text-slate-300 max-w-2xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="w-full mb-8">
+                    <div class="chart-container">
+                        <canvas id="psychological-chart"></canvas>
+                    </div>
+                </div>
+                <div class="flex items-start mb-6">
+                    ${stepperHtml}
+                </div>
+                <div id="psychological-content-display" class="bg-slate-800 p-6 rounded-lg min-h-[150px]">
+                </div>
+            `;
+
+        const ctx = document
+          .getElementById("psychological-chart")
+          .getContext("2d");
+        if (chartInstance) chartInstance.destroy();
+        const textColor = "#e2e8f0"; // slate-200
+        const gridColor = "rgba(255, 255, 255, 0.1)";
+
+        chartInstance = new Chart(ctx, {
+          type: "line",
+          data: data.chartData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 10,
+                title: {
+                  display: true,
+                  text: "Intensity / Adherence Level",
+                  color: textColor,
+                },
+                grid: { color: gridColor },
+                ticks: { color: textColor },
+              },
+              x: {
+                grid: { color: gridColor },
+                ticks: { color: textColor },
+              },
+            },
+            plugins: {
+              legend: { position: "top", labels: { color: textColor } },
+            },
+            interaction: { intersect: false, mode: "index" },
+          },
+        });
+
+        document.querySelectorAll(".stepper-item").forEach((item) => {
+          item.addEventListener("click", (e) => {
+            const index = parseInt(e.currentTarget.dataset.index);
+            updatePsychologicalContent(index);
+          });
+        });
+
+        updatePsychologicalContent(0);
+      }
+
+      function updatePsychologicalContent(index) {
+        activePhaseIndex = index;
+        const phaseData = contentData.psychological.phases[index];
+        const display = document.getElementById(
+          "psychological-content-display"
+        );
+        display.innerHTML = `<h3 class="text-2xl font-bold text-amber-500 mb-2">${phaseData.title}</h3><p class="text-lg text-slate-300">${phaseData.content}</p>`;
+
+        document.querySelectorAll(".stepper-item").forEach((item, i) => {
+          item.classList.toggle("active", i === index);
+        });
+
+        if (chartInstance) {
+          chartInstance.update();
+          setTimeout(() => {
+            const activePoint = chartInstance.getDatasetMeta(0).data[index];
+            if (activePoint) {
+              chartInstance.tooltip.setActiveElements(
+                [
+                  { datasetIndex: 0, index: index },
+                  { datasetIndex: 1, index: index },
+                ],
+                { x: activePoint.x, y: activePoint.y }
+              );
+              chartInstance.update();
+            }
+          }, 100);
+        }
+      }
+
+      function switchView(view) {
+        if (view === activeView) return;
+        activeView = view;
+        activeCardId = null;
+
+        navMilitary.classList.toggle("active", view === "military");
+        navPsychological.classList.toggle("active", view === "psychological");
+        navOperational.classList.toggle("active", view === "operational");
+
+        if (view === "psychological") {
+          renderPsychologicalView();
+        } else {
+          renderGenericCardView(view);
+        }
+      }
+
+      navMilitary.addEventListener("click", () => switchView("military"));
+      navPsychological.addEventListener("click", () =>
+        switchView("psychological")
+      );
+      navOperational.addEventListener("click", () => switchView("operational"));
+
+      switchView("military");
+    </script>
+  </body>
+</html>
